@@ -7,15 +7,14 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    /*
-    QStringList tableHeaders;
-    tableHeaders.append("File Name");
-    tableHeaders.append("Size");
+    /* TODO: potentially replace list widget with a table
+        QStringList tableHeaders;
+        tableHeaders.append("File Name");
+        tableHeaders.append("Size");
 
-    ui->tableWidget->setHorizontalHeaderLabels(tableHeaders);
-    ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
+        ui->tableWidget->setHorizontalHeaderLabels(tableHeaders);
+        ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     */
-
 
 }
 
@@ -39,12 +38,18 @@ void MainWindow::on_pushButton_Add_clicked()
         FileReader fileReader(filePath);
 
         // check if any errors were raised
-        if(!fileReader.hasError()) {    // no error
+        if(!fileReader.hasError()) {        // no error
+
+            // add file to qmap with filepath as the key
             files[filePath] = &fileReader;
-            new QListWidgetItem(fileReader.getFileName() + " — " + fileReader.getFilePath(), ui->listWidget);
+
+            // add file to the ui list widget and highlight it
+            ui->listWidget->setCurrentItem(new QListWidgetItem(fileReader.getFilePath(), ui->listWidget));
+
         }
-        else {  // some error
-            QMessageBox::warning(this,"Error parsing file",fileReader.errorString());
+        else {                              // some error
+            if(fileReader.error() != QXmlStreamReader::CustomError)
+                QMessageBox::warning(this,"Error parsing file",fileReader.errorString());
         }
 
     }
@@ -55,5 +60,15 @@ void MainWindow::on_pushButton_Add_clicked()
 
 void MainWindow::on_pushButton_Remove_clicked()
 {
-    //ui->listWidget->currentItem()
+    // if one item was selected
+    //  (multi-selection is not currently enabled here)
+    if(ui->listWidget->selectedItems().count() == 1) {
+
+        // remove the currently selected file qmap
+        files.remove(ui->listWidget->currentItem()->text());
+
+        // remove from the ui list
+        delete ui->listWidget->currentItem();
+
+    }
 }
