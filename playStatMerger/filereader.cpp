@@ -6,8 +6,12 @@ FileReader::FileReader()
 
 FileReader::FileReader(QString filePath)
 {
-    // check if the file exists and is actually a file
+    this->filePath = filePath;
+
     QFileInfo fileInfo(filePath);
+    this->fileName = fileInfo.fileName();
+
+    // check if the file exists and is actually a file
     if(fileInfo.exists() && fileInfo.isFile()) {
 
         this->fileSize = fileInfo.size();   // save the file's size in bytes
@@ -30,12 +34,14 @@ QMap<QString, EntryStatistics *> FileReader::readFile(QString filePath)
     if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         this->setDevice(&file);   // set xml stream reader to this file
 
+        // loop to eof
         while(!this->atEnd()) {
 
             // if the item is an entry child tag
             if(this->isStartElement() && this->name().toString() == ENTRY_TAG) {
                 entryCount++;
 
+                // add information to stat struct
                 EntryStatistics *stats = new EntryStatistics;
                 stats->count = this->attributes().value("", COUNT).toInt();
                 stats->rating = this->attributes().value("", RATING).toInt();
@@ -43,7 +49,7 @@ QMap<QString, EntryStatistics *> FileReader::readFile(QString filePath)
                 stats->lastPlayed = this->attributes().value("", LAST_PLAYED).toInt();
                 stats->added = this->attributes().value("", ADDED).toInt();
 
-                entryMap[this->attributes().value("", ID).toString()] = stats;
+                entryMap[this->attributes().value("", ID).toString()] = stats;  // add entry to qmap
             }
 
             // else save the version and mapping data found in the parent tag
@@ -64,6 +70,16 @@ QMap<QString, EntryStatistics *> FileReader::readFile(QString filePath)
     qDebug() << entryMap.value("03144a46328ee472")->count << "count";
 
     return entryMap;
+}
+
+QString FileReader::getFilePath() const
+{
+    return filePath;
+}
+
+QString FileReader::getFileName() const
+{
+    return fileName;
 }
 
 QMap<QString, EntryStatistics *> FileReader::getEntries() const

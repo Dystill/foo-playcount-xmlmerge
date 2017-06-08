@@ -37,6 +37,8 @@ private:
     const QString LAST_PLAYED = "LastPlayed";
 
     // meta data
+    QString fileName;
+    QString filePath;
     QString versionNumber;
     QString mappingString;
     int fileSize = 0;
@@ -47,6 +49,8 @@ public:
     FileReader();
     FileReader(QString filePath);
     QMap<QString, EntryStatistics *> getEntries() const;
+    QString getFileName() const;
+    QString getFilePath() const;
     int getFileSize() const;
     int getEntryCount() const;
     QString getVersion() const;
