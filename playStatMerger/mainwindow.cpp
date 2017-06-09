@@ -33,9 +33,9 @@ void MainWindow::displayItemInfo(QListWidgetItem *item) {
     ui->lineEditVersion->setText(files.value(filePath)->versionNumber);
     ui->lineEditMapping->setText(files.value(filePath)->mappingString);
 
-    //ui->lineEditEarliestItem;
-    //ui->lineEditLatestItem;
-    //ui->lineEditTotalPlays;
+    ui->lineEditEarliestItem->setText(QString::number(files.value(filePath)->earliestAdded));
+    ui->lineEditLatestItem->setText(QString::number(files.value(filePath)->latestAdded));
+    ui->lineEditTotalPlays->setText(QString::number(files.value(filePath)->totalPlays));
 
     ui->lineEditFilePath->setText(filePath);
 
@@ -56,11 +56,9 @@ FileData *MainWindow::exportFileData(FileReader *reader)
     data->fileSize = reader->getFileSize();
     data->entryCount = reader->getEntryCount();
 
-    /*
-    data->totalPlays = 0;
-    data->earliestAdded = 0;
-    data->latestAdded = 0;
-    */
+    data->totalPlays = reader->getTotalPlays();
+    data->earliestAdded = reader->getEarliestAdded();
+    data->latestAdded = reader->getLatestAdded();
 
     return data;
 }

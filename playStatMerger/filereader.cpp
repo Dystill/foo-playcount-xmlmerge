@@ -49,6 +49,8 @@ QMap<QString, EntryStatistics *> FileReader::readFile(QString filePath)
                 stats->lastPlayed = this->attributes().value("", LAST_PLAYED).toInt();
                 stats->added = this->attributes().value("", ADDED).toInt();
 
+                totalPlays += stats->count;
+
                 entryMap[this->attributes().value("", ID).toString()] = stats;  // add entry to qmap
             }
 
@@ -70,6 +72,16 @@ QMap<QString, EntryStatistics *> FileReader::readFile(QString filePath)
     qDebug() << entryMap.value("03144a46328ee472")->count << "count";
 
     return entryMap;
+}
+
+int FileReader::getLatestAdded() const
+{
+    return latestAdded;
+}
+
+int FileReader::getEarliestAdded() const
+{
+    return earliestAdded;
 }
 
 QString FileReader::getFilePath() const

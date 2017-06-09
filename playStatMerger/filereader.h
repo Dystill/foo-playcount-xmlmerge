@@ -44,6 +44,8 @@ private:
     int fileSize = 0;
     int entryCount = 0;
     int totalPlays = 0;
+    int earliestAdded = 0;
+    int latestAdded = 0;
 
 public:
     FileReader();
@@ -56,6 +58,8 @@ public:
     QString getVersion() const;
     QString getMapping() const;
     int getTotalPlays() const;
+    int getEarliestAdded() const;
+    int getLatestAdded() const;
 };
 
 #endif // FILEREADER_H
