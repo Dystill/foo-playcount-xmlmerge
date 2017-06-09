@@ -16,11 +16,53 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
     */
 
+    connect(ui->listWidget, SIGNAL(itemClicked(QListWidgetItem *)),
+            this, SLOT(displayItemInfo(QListWidgetItem *)));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::displayItemInfo(QListWidgetItem *item) {
+
+    QString filePath = item->text();
+
+    ui->lineEditNumberEntries->setText(QString::number(files.value(filePath)->entryCount));
+    ui->lineEditVersion->setText(files.value(filePath)->versionNumber);
+    ui->lineEditMapping->setText(files.value(filePath)->mappingString);
+
+    //ui->lineEditEarliestItem;
+    //ui->lineEditLatestItem;
+    //ui->lineEditTotalPlays;
+
+    ui->lineEditFilePath->setText(filePath);
+
+}
+
+FileData *MainWindow::exportFileData(FileReader *reader)
+{
+    FileData *data = new FileData();
+
+    data->fileName = reader->getFileName();
+    data->filePath = reader->getFilePath();
+
+    data->entries = reader->getEntries();
+
+    data->versionNumber = reader->getVersion();
+    data->mappingString = reader->getMapping();
+
+    data->fileSize = reader->getFileSize();
+    data->entryCount = reader->getEntryCount();
+
+    /*
+    data->totalPlays = 0;
+    data->earliestAdded = 0;
+    data->latestAdded = 0;
+    */
+
+    return data;
 }
 
 void MainWindow::on_pushButton_Add_clicked()
@@ -41,10 +83,13 @@ void MainWindow::on_pushButton_Add_clicked()
         if(!fileReader.hasError()) {        // no error
 
             // add file to qmap with filepath as the key
-            files[filePath] = &fileReader;
+            files[filePath] = exportFileData(&fileReader);
 
             // add file to the ui list widget and highlight it
             ui->listWidget->setCurrentItem(new QListWidgetItem(fileReader.getFilePath(), ui->listWidget));
+
+            // display the files information in the ui
+            displayItemInfo(ui->listWidget->currentItem());
 
         }
         else {                              // some error
@@ -65,10 +110,18 @@ void MainWindow::on_pushButton_Remove_clicked()
     if(ui->listWidget->selectedItems().count() == 1) {
 
         // remove the currently selected file qmap
-        files.remove(ui->listWidget->currentItem()->text());
+        delete files.take(ui->listWidget->currentItem()->text());
 
         // remove from the ui list
         delete ui->listWidget->currentItem();
 
+        // display item info for the item highlighted after the previous one was removed
+        if(ui->listWidget->selectedItems().count() == 1)
+            displayItemInfo(ui->listWidget->currentItem());
     }
+}
+
+void MainWindow::on_pushButton_Refresh_clicked()
+{
+    // TODO: reread xml file and redisplay information
 }

@@ -3,11 +3,30 @@
 
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QListWidgetItem>
 #include <filereader.h>
 
 namespace Ui {
 class MainWindow;
 }
+
+struct FileData {
+
+    QString fileName;
+    QString filePath;
+
+    QMap<QString,EntryStatistics *> entries;
+
+    QString versionNumber;
+    QString mappingString;
+
+    int fileSize = 0;
+    int entryCount = 0;
+    int totalPlays = 0;
+    int earliestAdded = 0;
+    int latestAdded = 0;
+
+};
 
 class MainWindow : public QMainWindow
 {
@@ -22,9 +41,16 @@ private slots:
 
     void on_pushButton_Remove_clicked();
 
+    void on_pushButton_Refresh_clicked();
+
+    void displayItemInfo(QListWidgetItem *item);    // shows file data in the ui
+
 private:
     Ui::MainWindow *ui;
-    QMap<QString, FileReader *> files;  // maps file path to the xml parsing object
+    QMap<QString, FileData *> files;  // maps file path to the xml parsing object
+
+    FileData *exportFileData(FileReader *reader);   // extracts data obtained from an export file reader
+
 };
 
 #endif // MAINWINDOW_H
