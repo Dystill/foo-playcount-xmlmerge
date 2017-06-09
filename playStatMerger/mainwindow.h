@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QListWidgetItem>
+#include <qmath.h>
+
 #include <filereader.h>
 
 namespace Ui {
@@ -52,6 +54,7 @@ private:
 
     FileData *exportFileData(FileReader *reader);   // extracts data obtained from an export file reader
 
+    qreal calculateStdev(QList<qreal> values, qreal average);
 };
 
 #endif // MAINWINDOW_H

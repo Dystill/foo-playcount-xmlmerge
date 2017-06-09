@@ -23,6 +23,8 @@ private:
     QMap<QString,EntryStatistics *> entries;  // holds a map pairing an entry's ID to it's playback data
     QMap<QString,EntryStatistics *> readFile(QString filePath);
 
+    QList<qreal> counts;  // holds each count value for faster access - no association with entry ids
+
     // XML tag strings
     const QString PARENT_TAG = "PlaybackStatistics";
     const QString VERSION = "Version";
@@ -56,6 +58,7 @@ public:
     QString getVersion() const;
     QString getMapping() const;
     int getTotalPlays() const;
+    QList<qreal> getCounts() const;
 };
 
 #endif // FILEREADER_H

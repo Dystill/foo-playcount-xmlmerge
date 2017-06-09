@@ -36,7 +36,7 @@ void MainWindow::displayItemInfo(QListWidgetItem *item) {
 
     ui->lineEditTotalPlays->setText(QString::number(data->totalPlays));
     ui->lineEditAverage->setText(QString::number(data->average));
-    ui->lineEditDeviation->setText(QString::number(0));
+    ui->lineEditDeviation->setText(QString::number(data->deviation));
 
     ui->lineEditFilePath->setText(filePath);
 
@@ -60,8 +60,22 @@ FileData *MainWindow::exportFileData(FileReader *reader)
     data->totalPlays = reader->getTotalPlays();
 
     data->average = qreal(data->totalPlays) / data->entryCount;
+    data->deviation = calculateStdev(reader->getCounts(), data->average);
 
     return data;
+}
+
+qreal MainWindow::calculateStdev(QList<qreal> values, qreal average) {
+
+    qreal varSum = 0;
+
+    // calculate deviation of each value from the mean
+    foreach(int i, values) {
+        varSum += qPow(i - average, 2);
+    }
+
+    // return standard deviation
+    return qSqrt(varSum / values.count());
 }
 
 void MainWindow::on_pushButton_Add_clicked()

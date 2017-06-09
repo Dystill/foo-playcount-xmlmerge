@@ -307,7 +307,7 @@
               <item>
                <widget class="QLabel" name="labelDeviation">
                 <property name="text">
-                 <string>Dev</string>
+                 <string>Playcount Deviation</string>
                 </property>
                </widget>
               </item>

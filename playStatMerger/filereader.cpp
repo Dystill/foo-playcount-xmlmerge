@@ -51,6 +51,7 @@ QMap<QString, EntryStatistics *> FileReader::readFile(QString filePath)
                 stats->added = this->attributes().value("", ADDED).toInt();
 
                 totalPlays += stats->count;
+                counts.append(stats->count);
 
                 entryMap[this->attributes().value("", ID).toString()] = stats;  // add entry to qmap
             }
@@ -69,6 +70,11 @@ QMap<QString, EntryStatistics *> FileReader::readFile(QString filePath)
     }
 
     return entryMap;
+}
+
+QList<qreal> FileReader::getCounts() const
+{
+    return counts;
 }
 
 QString FileReader::getFilePath() const
