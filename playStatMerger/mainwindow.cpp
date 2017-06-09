@@ -28,14 +28,15 @@ MainWindow::~MainWindow()
 void MainWindow::displayItemInfo(QListWidgetItem *item) {
 
     QString filePath = item->text();
+    FileData *data = files.value(filePath);
 
-    ui->lineEditNumberEntries->setText(QString::number(files.value(filePath)->entryCount));
-    ui->lineEditVersion->setText(files.value(filePath)->versionNumber);
-    ui->lineEditMapping->setText(files.value(filePath)->mappingString);
+    ui->lineEditNumberEntries->setText(QString::number(data->entryCount));
+    ui->lineEditVersion->setText(data->versionNumber);
+    ui->lineEditMapping->setText(data->mappingString);
 
-    ui->lineEditEarliestItem->setText(QString::number(files.value(filePath)->earliestAdded));
-    ui->lineEditLatestItem->setText(QString::number(files.value(filePath)->latestAdded));
-    ui->lineEditTotalPlays->setText(QString::number(files.value(filePath)->totalPlays));
+    ui->lineEditTotalPlays->setText(QString::number(data->totalPlays));
+    ui->lineEditAverage->setText(QString::number(data->average));
+    ui->lineEditDeviation->setText(QString::number(0));
 
     ui->lineEditFilePath->setText(filePath);
 
@@ -57,8 +58,8 @@ FileData *MainWindow::exportFileData(FileReader *reader)
     data->entryCount = reader->getEntryCount();
 
     data->totalPlays = reader->getTotalPlays();
-    data->earliestAdded = reader->getEarliestAdded();
-    data->latestAdded = reader->getLatestAdded();
+
+    data->average = qreal(data->totalPlays) / data->entryCount;
 
     return data;
 }

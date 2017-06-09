@@ -23,8 +23,9 @@ struct FileData {
     int fileSize = 0;
     int entryCount = 0;
     int totalPlays = 0;
-    int earliestAdded = 0;
-    int latestAdded = 0;
+
+    qreal average = 0;
+    qreal deviation = 0;
 
 };
 

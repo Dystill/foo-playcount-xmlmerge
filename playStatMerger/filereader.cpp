@@ -39,6 +39,7 @@ QMap<QString, EntryStatistics *> FileReader::readFile(QString filePath)
 
             // if the item is an entry child tag
             if(this->isStartElement() && this->name().toString() == ENTRY_TAG) {
+
                 entryCount++;
 
                 // add information to stat struct
@@ -67,21 +68,7 @@ QMap<QString, EntryStatistics *> FileReader::readFile(QString filePath)
         this->raiseError("File could not be opened.");
     }
 
-    qDebug() << entryMap.count() << "entries found.";
-    qDebug() << entryMap.value("03144a46328ee472")->firstPlayed << "first";
-    qDebug() << entryMap.value("03144a46328ee472")->count << "count";
-
     return entryMap;
-}
-
-int FileReader::getLatestAdded() const
-{
-    return latestAdded;
-}
-
-int FileReader::getEarliestAdded() const
-{
-    return earliestAdded;
 }
 
 QString FileReader::getFilePath() const
