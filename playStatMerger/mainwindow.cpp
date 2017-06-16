@@ -18,11 +18,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->listWidget, SIGNAL(itemClicked(QListWidgetItem *)),
             this, SLOT(displayItemInfo(QListWidgetItem *)));
+
+    groupRadioButtons();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::groupRadioButtons() {
+    // add the merge type radio buttons to a single group
+    mergeTypeButtonGroup.addButton(ui->radioButton_Add);
+    mergeTypeButtonGroup.addButton(ui->radioButton_Largest);
+    mergeTypeButtonGroup.addButton(ui->radioButton_Smallest);
 }
 
 void MainWindow::displayItemInfo(QListWidgetItem *item) {

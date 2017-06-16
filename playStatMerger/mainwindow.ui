@@ -401,19 +401,22 @@
             <property name="text">
              <string>Add Playcounts</string>
             </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="radioButton_Largest">
             <property name="text">
-             <string>Use Largest Playcount</string>
+             <string>Use Largest Playcount (X)</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="radioButton_Smallest">
             <property name="text">
-             <string>Use Smallest Playcount</string>
+             <string>Use Smallest Playcount (X)</string>
             </property>
            </widget>
           </item>

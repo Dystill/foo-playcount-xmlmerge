@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QListWidgetItem>
+#include <QButtonGroup>
 #include <qmath.h>
 
 #include <filereader.h>
@@ -50,11 +51,14 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QButtonGroup mergeTypeButtonGroup;
+
     QMap<QString, FileData *> files;  // maps file path to the xml parsing object
 
     FileData *exportFileData(FileReader *reader);   // extracts data obtained from an export file reader
 
     qreal calculateStdev(QList<qreal> values, qreal average);
+    void groupRadioButtons();
 };
 
 #endif // MAINWINDOW_H
