@@ -20,6 +20,9 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(displayItemInfo(QListWidgetItem *)));
 
     groupRadioButtons();
+
+    // set output directory to "Documents" folder
+    ui->lineEditFilePath_Output->setText(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 }
 
 MainWindow::~MainWindow()
