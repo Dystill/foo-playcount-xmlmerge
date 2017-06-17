@@ -50,11 +50,20 @@ private slots:
 
     void displayItemInfo(QListWidgetItem *item);    // shows file data in the ui
 
+    void on_pushButton_Merge_clicked();
+
 private:
     Ui::MainWindow *ui;
     QButtonGroup mergeTypeButtonGroup;  // invisible container for merge type radio buttons
 
     QMap<QString, FileData *> files;  // maps file path to the xml parsing object
+
+    // default output location
+    QString const defaultOutputFileDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString const defaultOutputFileName = "file";
+
+    // hold where the previously opened file was located
+    QString prevFileDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
 
     FileData *exportFileData(FileReader *reader);   // extracts data obtained from an export file reader
 

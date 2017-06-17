@@ -21,7 +21,7 @@ class FileReader : public QXmlStreamReader
 {
 private:
     QMap<QString,EntryStatistics *> entries;  // holds a map pairing an entry's ID to it's playback data
-    QMap<QString,EntryStatistics *> readFile(QString filePath);
+    QMap<QString,EntryStatistics *> readFile();
 
     QList<qreal> counts;  // holds each count value for faster access - no association with entry ids
 
@@ -49,6 +49,7 @@ private:
 
 public:
     FileReader();
+    FileReader(QFile file);
     FileReader(QString filePath);
     QMap<QString, EntryStatistics *> getEntries() const;
     QString getFileName() const;

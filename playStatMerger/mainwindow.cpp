@@ -22,7 +22,8 @@ MainWindow::MainWindow(QWidget *parent) :
     groupRadioButtons();
 
     // set output directory to "Documents" folder
-    ui->lineEditFilePath_Output->setText(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    ui->lineEditFilePath_Output->setText(defaultOutputFileDir);
+    ui->lineEditFilePath_OutputName->setText(defaultOutputFileName);
 }
 
 MainWindow::~MainWindow()
@@ -95,8 +96,12 @@ void MainWindow::on_pushButton_Add_clicked()
     // open file choose dialog
     QString filePath = QFileDialog::getOpenFileName(this,
                                                     tr("Open Playback Statistics Export File"),
-                                                    QDir::currentPath(),
+                                                    prevFileDir,
                                                     tr("Playback File (*.xml)"));
+
+    // save the file's path to use next time
+    QFileInfo fileInfo(filePath);
+    prevFileDir = fileInfo.path();
 
     // if the file was not already added
     if(!files.contains(filePath)) {
@@ -121,7 +126,6 @@ void MainWindow::on_pushButton_Add_clicked()
             if(fileReader.error() != QXmlStreamReader::CustomError)
                 QMessageBox::warning(this,"Error parsing file",fileReader.errorString());
         }
-
     }
     else {
         QMessageBox::information(this,"","File already added.");
@@ -149,4 +153,22 @@ void MainWindow::on_pushButton_Remove_clicked()
 void MainWindow::on_pushButton_Refresh_clicked()
 {
     // TODO: reread xml file and redisplay information
+}
+
+void MainWindow::on_pushButton_Merge_clicked()
+{
+    // get the specified output directory
+    QString outputDirPath = ui->lineEditFilePath_Output->text();
+
+    // if the directory exists
+    if(QDir(outputDirPath).exists()) {
+
+        // append directory with a slash if there isn't one
+        if(!outputDirPath.endsWith('/')) outputDirPath.append('/');
+
+        // create a qfile object for the specified output dir and file name
+        QFile outputFile(outputDirPath + ui->lineEditFilePath_OutputName->text() + ".xml");
+
+        qDebug() << outputFile.fileName();
+    }
 }
