@@ -8,30 +8,12 @@
 #include <QStandardPaths>
 #include <qmath.h>
 
-#include <filereader.h>
+#include "filereader.h"
+#include "filewriter.h"
 
 namespace Ui {
 class MainWindow;
 }
-
-struct FileData {
-
-    QString fileName;
-    QString filePath;
-
-    QMap<QString,EntryStatistics *> entries;
-
-    QString versionNumber;
-    QString mappingString;
-
-    int fileSize = 0;
-    int entryCount = 0;
-    int totalPlays = 0;
-
-    qreal average = 0;
-    qreal deviation = 0;
-
-};
 
 class MainWindow : public QMainWindow
 {
