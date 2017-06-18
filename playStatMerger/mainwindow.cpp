@@ -33,9 +33,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::groupRadioButtons() {
     // add the merge type radio buttons to a single group
-    mergeTypeButtonGroup.addButton(ui->radioButton_Add);
-    mergeTypeButtonGroup.addButton(ui->radioButton_Largest);
-    mergeTypeButtonGroup.addButton(ui->radioButton_Smallest);
+    mergeTypeButtonGroup.addButton(ui->radioButton_Add, AddPlaycounts);
+    mergeTypeButtonGroup.addButton(ui->radioButton_Largest, UseLargest);
+    mergeTypeButtonGroup.addButton(ui->radioButton_Smallest, UseSmallest);
 }
 
 void MainWindow::displayItemInfo(QListWidgetItem *item) {
@@ -99,36 +99,40 @@ void MainWindow::on_pushButton_Add_clicked()
                                                     prevFileDir,
                                                     tr("Playback File (*.xml)"));
 
-    // save the file's path to use next time
-    QFileInfo fileInfo(filePath);
-    prevFileDir = fileInfo.path();
+    // if the user did not cancel the action
+    if(!filePath.isNull()) {
 
-    // if the file was not already added
-    if(!files.contains(filePath)) {
+        // save the file's path to use next time
+        QFileInfo fileInfo(filePath);
+        prevFileDir = fileInfo.path();
 
-        // parse the file
-        FileReader fileReader(filePath);
+        // if the file was not already added
+        if(!files.contains(filePath)) {
 
-        // check if any errors were raised
-        if(!fileReader.hasError()) {        // no error
+            // parse the file
+            FileReader fileReader(filePath);
 
-            // add file to qmap with filepath as the key
-            files[filePath] = exportFileData(&fileReader);
+            // check if any errors were raised
+            if(!fileReader.hasError()) {        // no error
 
-            // add file to the ui list widget and highlight it
-            ui->listWidget->setCurrentItem(new QListWidgetItem(fileReader.getFilePath(), ui->listWidget));
+                // add file to qmap with filepath as the key
+                files[filePath] = exportFileData(&fileReader);
 
-            // display the files information in the ui
-            displayItemInfo(ui->listWidget->currentItem());
+                // add file to the ui list widget and highlight it
+                ui->listWidget->setCurrentItem(new QListWidgetItem(fileReader.getFilePath(), ui->listWidget));
 
+                // display the files information in the ui
+                displayItemInfo(ui->listWidget->currentItem());
+
+            }
+            else {                              // some error
+                if(fileReader.error() != QXmlStreamReader::CustomError)
+                    QMessageBox::warning(this,"Error parsing file",fileReader.errorString());
+            }
         }
-        else {                              // some error
-            if(fileReader.error() != QXmlStreamReader::CustomError)
-                QMessageBox::warning(this,"Error parsing file",fileReader.errorString());
+        else {
+            QMessageBox::information(this,"","File already added.");
         }
-    }
-    else {
-        QMessageBox::information(this,"","File already added.");
     }
 }
 
@@ -163,12 +167,37 @@ void MainWindow::on_pushButton_Merge_clicked()
     // if the directory exists
     if(QDir(outputDirPath).exists()) {
 
-        // append directory with a slash if there isn't one
-        if(!outputDirPath.endsWith('/')) outputDirPath.append('/');
+        // if 2 or more files are loaded
+        if(files.size() > 1) {
 
-        // create a qfile object for the specified output dir and file name
-        QFile outputFile(outputDirPath + ui->lineEditFilePath_OutputName->text() + ".xml");
+            // append directory with a slash if there isn't one
+            if(!outputDirPath.endsWith('/')) outputDirPath.append('/');
 
-        qDebug() << outputFile.fileName();
+            // create a qfile object for the specified output dir and file name
+            QFile outputFile(outputDirPath + ui->lineEditFilePath_OutputName->text() + ".xml");
+
+            qDebug() << outputFile.fileName();
+
+            switch (mergeTypeButtonGroup.checkedId()) {
+            case AddPlaycounts: // add radio button
+                qDebug() << "Add playcounts";
+                break;
+            case UseLargest: // largest radio button
+                qDebug() << "Largest";
+                break;
+            case UseSmallest: // smallest radio button
+                qDebug() << "Smallest";
+                break;
+            default:
+                break;
+            }
+
+        }
+        else {
+            QMessageBox::warning(this, "", "Please select 2 or more files to use.");
+        }
+    }
+    else {
+        QMessageBox::warning(this, "", "Output directory does not exist.");
     }
 }

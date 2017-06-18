@@ -15,6 +15,12 @@ namespace Ui {
 class MainWindow;
 }
 
+enum MergeType {
+    AddPlaycounts = 1,
+    UseLargest = 2,
+    UseSmallest = 3
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
