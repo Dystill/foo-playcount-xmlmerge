@@ -46,39 +46,6 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
     if(fileData.size() > 1) {
 
         ///
-        /// compare version and mapping data for all files
-        ///
-
-        bool sameVersion = true,
-             sameMapping = true;
-
-        // compare version numbers and mappings for each file
-        for(int i = 1; i < fileData.size(); i++) {
-            if(fileData.at(i)->versionNumber.compare(fileData.at(i-1)->versionNumber) != 0 && sameVersion) {
-                sameVersion = false;
-            }
-            if(fileData.at(i)->mappingString.compare(fileData.at(i-1)->mappingString) != 0 && sameMapping) {
-                sameMapping = false;
-            }
-        }
-
-        // if either the version numbers or mappings are NOT equal
-        if(!(sameVersion && sameMapping)) {
-            qDebug() << "Version:" << sameVersion;
-            qDebug() << "Mapping:" << sameMapping;
-
-            // create a readable error string to tell to the user what isn't the same across the files
-            QString errorString = "The " +
-                    QString(sameVersion ? "" : "version") +                         // versions aren't the same
-                    QString(sameVersion || sameMapping ? "" : " and ") +            // both aren't the same
-                    QString(sameMapping ? "" : "mapping") +                         // mappings aren't the same
-                    " values for some of the selected files are not equal.\nContinue?";
-
-            qDebug() << errorString;
-        }
-
-
-        ///
         /// merge the data based on selected merge type
         ///
 
@@ -149,6 +116,12 @@ FileData *MainWindow::exportFileData(FileReader *reader)
     return data;
 }
 
+/**
+ * @brief MainWindow::calculateStdev
+ * @param values
+ * @param average
+ * @return return a calculated standard deviation for the listed values and the provided average
+ */
 qreal MainWindow::calculateStdev(QList<qreal> values, qreal average) {
 
     qreal varSum = 0;
@@ -160,6 +133,66 @@ qreal MainWindow::calculateStdev(QList<qreal> values, qreal average) {
 
     // return standard deviation
     return qSqrt(varSum / values.count());
+}
+
+/**
+ * @brief MainWindow::compareFileVersionAndMapping
+ * @param QList<FileData *> fileData
+ * @return bool value for whether or not the files in the list should be merged
+ */
+bool MainWindow::compareFileVersionAndMapping(QList<FileData *> fileData) {
+
+    // check if there is more than 1 file
+    if(fileData.size() > 1) {
+
+        bool sameVersion = true,
+             sameMapping = true;
+
+        // compare version numbers and mappings for each file
+        for(int i = 1; i < fileData.size(); i++) {
+            if(fileData.at(i)->versionNumber.compare(fileData.at(i-1)->versionNumber) != 0 && sameVersion) {
+                sameVersion = false;
+            }
+            if(fileData.at(i)->mappingString.compare(fileData.at(i-1)->mappingString) != 0 && sameMapping) {
+                sameMapping = false;
+            }
+        }
+
+        // if either the version numbers or mappings are NOT equal
+        if(!(sameVersion && sameMapping)) {
+            qDebug() << "Version:" << sameVersion;
+            qDebug() << "Mapping:" << sameMapping;
+
+            // create a readable error string to tell to the user what isn't the same across the files
+            QString errorString = "The " +
+                    QString(sameVersion ? "" : "version") +                         // versions aren't the same
+                    QString(sameVersion || sameMapping ? "" : " and ") +            // both aren't the same
+                    QString(sameMapping ? "" : "mapping") +                         // mappings aren't the same
+                    " values for some of the selected files are not equal.\nContinue?";
+
+            // display dialog asking the user how to continue
+            QMessageBox::StandardButton clicked =
+                    QMessageBox::question(this, "", errorString,
+                                          QMessageBox::Ok | QMessageBox::Cancel,
+                                          QMessageBox::Cancel);
+
+            // return true or false depending on what button was pressed
+            switch(clicked) {
+            case QMessageBox::Ok:       // true if ok
+                return true;
+            case QMessageBox::Cancel:   // false if cancel or other
+            default:
+                return false;
+            };
+
+        }
+        else {  // return true if the version numbers and mappings are all the same
+            return true;
+        }
+    }
+    else {  // return true if there is only one file
+        return true;
+    }
 }
 
 void MainWindow::on_pushButton_Add_clicked()
@@ -244,16 +277,21 @@ void MainWindow::on_pushButton_Merge_clicked()
         // if 2 or more files are loaded
         if(files.size() > 1) {
 
-            // append directory with a slash if there isn't one
-            if(!outputFileDir.endsWith('/')) outputFileDir.append('/');
+            // if these files can or are allowed by the user to be merged
+            // compared the version number and mapping code
+            if(compareFileVersionAndMapping(files.values())) {
+                // append directory with a slash if there isn't one
+                if(!outputFileDir.endsWith('/')) outputFileDir.append('/');
 
-            // create a qfile object for the specified output dir and file name
-            QFile outputFile(outputFileDir + outputFileName);
+                // create a qfile object for the specified output dir and file name
+                QFile outputFile(outputFileDir + outputFileName);
 
-            qDebug() << outputFile.fileName();
-
-            // merge the file data
-            MergeData merged = mergeFileData(files.values(), mergeTypeButtonGroup.checkedId());
+                // merge the file data
+                MergeData merged = mergeFileData(files.values(), mergeTypeButtonGroup.checkedId());
+            }
+            else {
+                QMessageBox::information(this, "", "Merge cancelled.");
+            }
 
         }
         else {

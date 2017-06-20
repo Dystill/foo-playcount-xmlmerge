@@ -63,6 +63,7 @@ private:
     void groupRadioButtons();   // function to add radio buttons to groups
 
     MergeData mergeFileData(QList<FileData *> fileData, int mergeType);
+    bool compareFileVersionAndMapping(QList<FileData *> fileData);
 };
 
 #endif // MAINWINDOW_H
