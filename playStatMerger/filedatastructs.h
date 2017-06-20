@@ -17,7 +17,7 @@ struct EntryStatistics {
     int added;
 };
 
-// data structure to hold the information of a single export file
+// data structure to hold the information for a single export file
 struct FileData {
 
     QString fileName;
@@ -35,6 +35,14 @@ struct FileData {
     qreal average = 0;
     qreal deviation = 0;
 
+};
+
+// data structure to hold file information after merging
+struct MergeData {
+    QMap<QString,EntryStatistics *> entries;
+
+    QString versionNumber;
+    QString mappingString;
 };
 
 #endif // FILEDATASTRUCTS_H

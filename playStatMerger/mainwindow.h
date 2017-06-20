@@ -50,6 +50,10 @@ private:
     QString const defaultOutputFileDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     QString const defaultOutputFileName = "file";
 
+    // holds the output destination while merging
+    QString outputFileDir;
+    QString outputFileName;
+
     // hold where the previously opened file was located
     QString prevFileDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
 
@@ -57,6 +61,8 @@ private:
 
     qreal calculateStdev(QList<qreal> values, qreal average);   // function to calculate a standard deviation
     void groupRadioButtons();   // function to add radio buttons to groups
+
+    MergeData mergeFileData(QList<FileData *> fileData, int mergeType);
 };
 
 #endif // MAINWINDOW_H

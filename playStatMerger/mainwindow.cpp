@@ -32,10 +32,78 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::groupRadioButtons() {
-    // add the merge type radio buttons to a single group
+    // add the merge type radio buttons to a single group and assign each a MergeType id
     mergeTypeButtonGroup.addButton(ui->radioButton_Add, AddPlaycounts);
     mergeTypeButtonGroup.addButton(ui->radioButton_Largest, UseLargest);
     mergeTypeButtonGroup.addButton(ui->radioButton_Smallest, UseSmallest);
+}
+
+MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
+{
+    MergeData data;
+
+    // if there is more than 1 file
+    if(fileData.size() > 1) {
+
+        ///
+        /// compare version and mapping data for all files
+        ///
+
+        bool sameVersion = true,
+             sameMapping = true;
+
+        // compare version numbers and mappings for each file
+        for(int i = 1; i < fileData.size(); i++) {
+            if(fileData.at(i)->versionNumber.compare(fileData.at(i-1)->versionNumber) != 0 && sameVersion) {
+                sameVersion = false;
+            }
+            if(fileData.at(i)->mappingString.compare(fileData.at(i-1)->mappingString) != 0 && sameMapping) {
+                sameMapping = false;
+            }
+        }
+
+        // if either the version numbers or mappings are NOT equal
+        if(!(sameVersion && sameMapping)) {
+            qDebug() << "Version:" << sameVersion;
+            qDebug() << "Mapping:" << sameMapping;
+
+            // create a readable error string to tell to the user what isn't the same across the files
+            QString errorString = "The " +
+                    QString(sameVersion ? "" : "version") +                         // versions aren't the same
+                    QString(sameVersion || sameMapping ? "" : " and ") +            // both aren't the same
+                    QString(sameMapping ? "" : "mapping") +                         // mappings aren't the same
+                    " values for some of the selected files are not equal.\nContinue?";
+
+            qDebug() << errorString;
+        }
+
+
+        ///
+        /// merge the data based on selected merge type
+        ///
+
+        switch (mergeType) {
+        case AddPlaycounts: // add radio button
+            qDebug() << "Add playcounts";
+
+            break;
+        case UseLargest: // largest radio button
+        case UseSmallest: // smallest radio button
+        default:
+            QMessageBox::information(this,"","Not yet supported.");
+            break;
+        }
+    }
+    // if there is only 1 file
+    else if(fileData.size() == 1) {
+        // copy data into the MergeData struct
+        data.entries = files.values().at(0)->entries;
+        data.versionNumber = files.values().at(0)->versionNumber;
+        data.mappingString = files.values().at(0)->mappingString;
+    }
+
+    // return the MergeData struct
+    return data;
 }
 
 void MainWindow::displayItemInfo(QListWidgetItem *item) {
@@ -43,6 +111,7 @@ void MainWindow::displayItemInfo(QListWidgetItem *item) {
     QString filePath = item->text();
     FileData *data = files.value(filePath);
 
+    // take data for the selected file and display it in the corresponding fields
     ui->lineEditNumberEntries->setText(QString::number(data->entryCount));
     ui->lineEditVersion->setText(data->versionNumber);
     ui->lineEditMapping->setText(data->mappingString);
@@ -59,10 +128,11 @@ FileData *MainWindow::exportFileData(FileReader *reader)
 {
     FileData *data = new FileData();
 
+    // obtain parsed data from the file reader
     data->fileName = reader->getFileName();
     data->filePath = reader->getFilePath();
 
-    data->entries = reader->getEntries();
+    data->entries = reader->getEntries();   // qmap of all the entry statistics
 
     data->versionNumber = reader->getVersion();
     data->mappingString = reader->getMapping();
@@ -72,6 +142,7 @@ FileData *MainWindow::exportFileData(FileReader *reader)
 
     data->totalPlays = reader->getTotalPlays();
 
+    // calculate the average playcount and stdev
     data->average = qreal(data->totalPlays) / data->entryCount;
     data->deviation = calculateStdev(reader->getCounts(), data->average);
 
@@ -152,6 +223,8 @@ void MainWindow::on_pushButton_Remove_clicked()
         if(ui->listWidget->selectedItems().count() == 1)
             displayItemInfo(ui->listWidget->currentItem());
     }
+
+    // TODO: remove displayed information when all files are removed
 }
 
 void MainWindow::on_pushButton_Refresh_clicked()
@@ -162,35 +235,25 @@ void MainWindow::on_pushButton_Refresh_clicked()
 void MainWindow::on_pushButton_Merge_clicked()
 {
     // get the specified output directory
-    QString outputDirPath = ui->lineEditFilePath_Output->text();
+    outputFileDir = ui->lineEditFilePath_Output->text();
+    outputFileName = ui->lineEditFilePath_OutputName->text() + ".xml";
 
     // if the directory exists
-    if(QDir(outputDirPath).exists()) {
+    if(QDir(outputFileDir).exists()) {
 
         // if 2 or more files are loaded
         if(files.size() > 1) {
 
             // append directory with a slash if there isn't one
-            if(!outputDirPath.endsWith('/')) outputDirPath.append('/');
+            if(!outputFileDir.endsWith('/')) outputFileDir.append('/');
 
             // create a qfile object for the specified output dir and file name
-            QFile outputFile(outputDirPath + ui->lineEditFilePath_OutputName->text() + ".xml");
+            QFile outputFile(outputFileDir + outputFileName);
 
             qDebug() << outputFile.fileName();
 
-            switch (mergeTypeButtonGroup.checkedId()) {
-            case AddPlaycounts: // add radio button
-                qDebug() << "Add playcounts";
-                break;
-            case UseLargest: // largest radio button
-                qDebug() << "Largest";
-                break;
-            case UseSmallest: // smallest radio button
-                qDebug() << "Smallest";
-                break;
-            default:
-                break;
-            }
+            // merge the file data
+            MergeData merged = mergeFileData(files.values(), mergeTypeButtonGroup.checkedId());
 
         }
         else {
