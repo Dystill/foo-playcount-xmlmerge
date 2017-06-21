@@ -4,6 +4,39 @@ FileReader::FileReader()
 {
 }
 
+// constructor that takes a QFile object to read from
+FileReader::FileReader(QFile file) {
+
+    // get the file path
+    this->filePath = file.fileName();
+
+    // get file information
+    QFileInfo fileInfo(this->filePath);
+    this->fileName = fileInfo.fileName();   // file name
+
+    // check if the file exists and is actually a file
+    if(fileInfo.exists() && fileInfo.isFile()) {
+
+        this->fileSize = fileInfo.size();   // save the file's size in bytes
+
+        // attempt to open the file for reading
+        if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+
+            this->setDevice(&file);   // set xml stream reader to this file
+
+            entries = this->readFile();   // pass to read file function
+
+        }
+        else {
+            this->raiseError("Could not open the specified file.");
+        }
+    }
+    else {
+        this->raiseError("Could not find the specified file.");
+    }
+}
+
+// constructor that takes a fiull file path to read from
 FileReader::FileReader(QString filePath)
 {
     this->filePath = filePath;
@@ -16,57 +49,58 @@ FileReader::FileReader(QString filePath)
 
         this->fileSize = fileInfo.size();   // save the file's size in bytes
 
-        entries = this->readFile(filePath);   // pass to read file function
+        QFile file(filePath);
 
-    }
-    else {
+        // attempt to open the file for reading
+        if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 
-        this->raiseError("Could not find specified file.");
+            this->setDevice(&file);   // set xml stream reader to this file
 
-    }
-}
+            entries = this->readFile();   // pass to read file function
 
-QMap<QString, EntryStatistics *> FileReader::readFile(QString filePath)
-{
-    QFile file(filePath);
-    QMap<QString, EntryStatistics *> entryMap;
-
-    if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        this->setDevice(&file);   // set xml stream reader to this file
-
-        // loop to eof
-        while(!this->atEnd()) {
-
-            // if the item is an entry child tag
-            if(this->isStartElement() && this->name().toString() == ENTRY_TAG) {
-
-                entryCount++;
-
-                // add information to stat struct
-                EntryStatistics *stats = new EntryStatistics;
-                stats->count = this->attributes().value("", COUNT).toInt();
-                stats->rating = this->attributes().value("", RATING).toInt();
-                stats->firstPlayed = this->attributes().value("", FIRST_PLAYED).toInt();
-                stats->lastPlayed = this->attributes().value("", LAST_PLAYED).toInt();
-                stats->added = this->attributes().value("", ADDED).toInt();
-
-                totalPlays += stats->count;
-                counts.append(stats->count);
-
-                entryMap[this->attributes().value("", ID).toString()] = stats;  // add entry to qmap
-            }
-
-            // else save the version and mapping data found in the parent tag
-            else if(this->isStartElement() && this->name().toString() == PARENT_TAG) {
-                versionNumber = this->attributes().value("", VERSION).toString();
-                mappingString = this->attributes().value("", MAPPING).toString();
-            }
-
-            this->readNext();
+        }
+        else {
+            this->raiseError("Could not open the specified file.");
         }
     }
     else {
-        this->raiseError("File could not be opened.");
+        this->raiseError("Could not find the specified file.");
+    }
+}
+
+QMap<QString, EntryStatistics *> FileReader::readFile()
+{
+    QMap<QString, EntryStatistics *> entryMap;
+
+    // loop to eof
+    while(!this->atEnd()) {
+
+        // if the item is an entry child tag
+        if(this->isStartElement() && this->name().toString() == ENTRY_TAG) {
+
+            entryCount++;
+
+            // add information to stat struct
+            EntryStatistics *stats = new EntryStatistics;
+            stats->count = this->attributes().value("", COUNT).toInt();
+            stats->rating = this->attributes().value("", RATING).toInt();
+            stats->firstPlayed = this->attributes().value("", FIRST_PLAYED).toInt();
+            stats->lastPlayed = this->attributes().value("", LAST_PLAYED).toInt();
+            stats->added = this->attributes().value("", ADDED).toInt();
+
+            totalPlays += stats->count;
+            counts.append(stats->count);
+
+            entryMap[this->attributes().value("", ID).toString()] = stats;  // add entry to qmap
+        }
+
+        // else save the version and mapping data found in the parent tag
+        else if(this->isStartElement() && this->name().toString() == PARENT_TAG) {
+            versionNumber = this->attributes().value("", VERSION).toString();
+            mappingString = this->attributes().value("", MAPPING).toString();
+        }
+
+        this->readNext();
     }
 
     return entryMap;

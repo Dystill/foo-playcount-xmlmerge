@@ -2,26 +2,14 @@
 #define FILEREADER_H
 
 #include <QXmlStreamReader>
-#include <QMap>
-#include <QFile>
-#include <QFileInfo>
-#include <QFileDialog>
-#include <QDebug>
 
-// data structure to hold playback statistics for each song entry in the export xml file
-struct EntryStatistics {
-    int count = 0;
-    int rating;
-    int firstPlayed;
-    int lastPlayed;
-    int added;
-};
+#include "filedatastructs.h"
 
 class FileReader : public QXmlStreamReader
 {
 private:
     QMap<QString,EntryStatistics *> entries;  // holds a map pairing an entry's ID to it's playback data
-    QMap<QString,EntryStatistics *> readFile(QString filePath);
+    QMap<QString,EntryStatistics *> readFile();
 
     QList<qreal> counts;  // holds each count value for faster access - no association with entry ids
 
@@ -49,6 +37,7 @@ private:
 
 public:
     FileReader();
+    FileReader(QFile file);
     FileReader(QString filePath);
     QMap<QString, EntryStatistics *> getEntries() const;
     QString getFileName() const;

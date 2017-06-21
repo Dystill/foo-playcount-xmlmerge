@@ -26,11 +26,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    filereader.cpp
+    filereader.cpp \
+    filewriter.cpp
 
 HEADERS += \
         mainwindow.h \
-    filereader.h
+    filereader.h \
+    filewriter.h \
+    filedatastructs.h
 
 FORMS += \
         mainwindow.ui

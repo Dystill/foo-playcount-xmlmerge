@@ -4,31 +4,22 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QListWidgetItem>
+#include <QButtonGroup>
+#include <QStandardPaths>
 #include <qmath.h>
+#include <algorithm>
 
-#include <filereader.h>
+#include "filereader.h"
+#include "filewriter.h"
 
 namespace Ui {
 class MainWindow;
 }
 
-struct FileData {
-
-    QString fileName;
-    QString filePath;
-
-    QMap<QString,EntryStatistics *> entries;
-
-    QString versionNumber;
-    QString mappingString;
-
-    int fileSize = 0;
-    int entryCount = 0;
-    int totalPlays = 0;
-
-    qreal average = 0;
-    qreal deviation = 0;
-
+enum MergeType {
+    AddPlaycounts = 1,
+    UseLargest = 2,
+    UseSmallest = 3
 };
 
 class MainWindow : public QMainWindow
@@ -48,13 +39,34 @@ private slots:
 
     void displayItemInfo(QListWidgetItem *item);    // shows file data in the ui
 
+    void on_pushButton_Merge_clicked();
+
 private:
     Ui::MainWindow *ui;
+    QButtonGroup mergeTypeButtonGroup;  // invisible container for merge type radio buttons
+
     QMap<QString, FileData *> files;  // maps file path to the xml parsing object
+
+    // default output location
+    QString const defaultOutputFileDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString const defaultOutputFileName = "file";
+
+    // holds the output destination while merging
+    QString outputFileDir;
+    QString outputFileName;
+
+    // hold where the previously opened file was located
+    QString prevFileDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
 
     FileData *exportFileData(FileReader *reader);   // extracts data obtained from an export file reader
 
-    qreal calculateStdev(QList<qreal> values, qreal average);
+    qreal calculateStdev(QList<qreal> values, qreal average);   // function to calculate a standard deviation
+    void groupRadioButtons();   // function to add radio buttons to groups
+
+    MergeData mergeFileData(QList<FileData *> fileData, int mergeType);
+    bool compareFileVersionAndMapping(QList<FileData *> fileData);
+    // QMap<QString, EntryStatistics *> addPlayCountEntries(QList<FileData *> fileData);
+
 };
 
 #endif // MAINWINDOW_H
