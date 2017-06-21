@@ -65,7 +65,7 @@ private:
 
     MergeData mergeFileData(QList<FileData *> fileData, int mergeType);
     bool compareFileVersionAndMapping(QList<FileData *> fileData);
-    QMap<QString, EntryStatistics *> addPlayCountEntries(QList<FileData *> fileData);
+    // QMap<QString, EntryStatistics *> addPlayCountEntries(QList<FileData *> fileData);
 
 };
 

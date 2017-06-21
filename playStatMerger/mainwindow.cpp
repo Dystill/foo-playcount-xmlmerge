@@ -42,33 +42,84 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
 {
     MergeData data;
 
-    // if there is more than 1 file
+    // if there's at least 1 file
     if(fileData.size() > 1) {
 
-        switch (mergeType) {
-        case AddPlaycounts: // add radio button
-            qDebug() << "Add playcounts";
-            data.entries = addPlayCountEntries(fileData);
-            break;
-        case UseLargest: // largest radio button
-        case UseSmallest: // smallest radio button
-        default:
-            QMessageBox::information(this,"","Not yet supported.");
-            break;
+        // get the set of entries from the first file
+        QMap<QString,EntryStatistics *> merged = data.entries;
+
+        // go through each file
+        for(int i = 1; i < fileData.size(); i++) {
+
+            QMap<QString,EntryStatistics *> current = fileData.at(i)->entries;  // get the next file's entries map
+
+            // iterate through each value in the map
+            QMap<QString,EntryStatistics *>::iterator entry;
+            for(entry = current.begin(); entry != current.end(); entry++) {
+
+                // if the merged list already contains the entry id
+                if(merged.contains(entry.key())) {
+
+                    // use mergeType parameter to determine how to combine playcounts
+                    switch (mergeType) {
+                    case AddPlaycounts: // add radio button
+                        qDebug() << "Add playcounts";
+                        merged[entry.key()]->count += entry.value()->count; // add playcount to merged value
+                        break;
+                    case UseLargest: // largest radio button
+                        merged[entry.key()]->count =
+                                std::max(merged.value(entry.key())->count,
+                                         entry.value()->count);            // take the largest count value
+                    case UseSmallest: // smallest radio button
+                        merged[entry.key()]->count =
+                                std::min(merged.value(entry.key())->count,
+                                         entry.value()->count);            // take the smallest count value
+                    default:
+                        QMessageBox::information(this,"","No radio button was selected. Defaulting to add playcounts.");
+                        merged[entry.key()]->count += entry.value()->count; // add playcount to merged value
+                        break;
+                    }
+
+                    // rating
+                    merged[entry.key()]->rating =
+                            std::max(merged.value(entry.key())->rating,
+                                     entry.value()->rating);            // take the largest rating value
+
+                    // date added
+                    merged[entry.key()]->added =
+                            std::min(merged.value(entry.key())->added,
+                                     entry.value()->added);             // take the smallest added value
+
+                    // first played
+                    merged[entry.key()]->firstPlayed =
+                            std::min(merged.value(entry.key())->firstPlayed,
+                                     entry.value()->firstPlayed);       // take the smallest firstPlayed value
+
+                    // last played
+                    merged[entry.key()]->lastPlayed =
+                            std::min(merged.value(entry.key())->lastPlayed,
+                                     entry.value()->lastPlayed);        // take the smallest lastPlayed value
+                }
+                // else this is a new entry
+                else {
+                    merged[entry.key()] = entry.value();    // add the entire new entry to the merged list
+                }
+            }
         }
     }
     // if there is only 1 file
     else if(fileData.size() == 1) {
         // copy data into the MergeData struct
-        data.entries = files.values().at(0)->entries;
-        data.versionNumber = files.values().at(0)->versionNumber;
-        data.mappingString = files.values().at(0)->mappingString;
+        data.entries = fileData.at(0)->entries;
+        data.versionNumber = fileData.at(0)->versionNumber;
+        data.mappingString = fileData.at(0)->mappingString;
     }
 
     // return the MergeData struct
     return data;
 }
 
+/*
 QMap<QString,EntryStatistics *> MainWindow::addPlayCountEntries(QList<FileData *> fileData) {
 
     QMap<QString,EntryStatistics *> merged;   // holds the combined values for all lists
@@ -112,6 +163,7 @@ QMap<QString,EntryStatistics *> MainWindow::addPlayCountEntries(QList<FileData *
 
     return merged;
 }
+*/
 
 void MainWindow::displayItemInfo(QListWidgetItem *item) {
 
