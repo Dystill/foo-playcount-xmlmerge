@@ -7,6 +7,7 @@
 #include <QButtonGroup>
 #include <QStandardPaths>
 #include <qmath.h>
+#include <algorithm>
 
 #include "filereader.h"
 #include "filewriter.h"
@@ -64,6 +65,8 @@ private:
 
     MergeData mergeFileData(QList<FileData *> fileData, int mergeType);
     bool compareFileVersionAndMapping(QList<FileData *> fileData);
+    QMap<QString, EntryStatistics *> addPlayCountEntries(QList<FileData *> fileData);
+
 };
 
 #endif // MAINWINDOW_H
