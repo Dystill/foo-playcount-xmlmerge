@@ -8,11 +8,11 @@
 class FileWriter : public QXmlStreamWriter
 {
 private:
+    void writeFile(MergeData data);
 
-    void writeFile(FileData fileData);
 public:
     FileWriter();
-    FileWriter(QFile outputFile, FileData fileData);
+    FileWriter(QString output, MergeData data);
 };
 
 #endif // FILEWRITER_H

@@ -373,13 +373,17 @@ void MainWindow::on_pushButton_Merge_clicked()
             // compared the version number and mapping code
             if(compareFileVersionAndMapping(files.values())) {
                 // append directory with a slash if there isn't one
-                if(!outputFileDir.endsWith('/')) outputFileDir.append('/');
+                if(!outputFileDir.endsWith('/'))
+                    outputFileDir.append('/');
 
                 // create a qfile object for the specified output dir and file name
-                QFile outputFile(outputFileDir + outputFileName);
+                QString outputLocation = outputFileDir + outputFileName;
 
                 // merge the file data
-                MergeData merged = mergeFileData(files.values(), mergeTypeButtonGroup.checkedId());
+                MergeData mergedData = mergeFileData(files.values(), mergeTypeButtonGroup.checkedId());
+
+                // write data to file using FileWriter object
+                FileWriter writer(outputLocation, mergedData);
             }
             else {
                 QMessageBox::information(this, "", "Merge cancelled.");
