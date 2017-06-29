@@ -42,7 +42,18 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
 {
     MergeData data;
 
-    // if there's at least 1 file
+    // if there is atleast 1 file
+    if(fileData.size() >= 1) {
+
+        // copy entries from first file in FileData list
+        data.entries = fileData.at(0)->entries;
+
+        // take the first file's version and mapping (assumed to be the same for all files)
+        data.versionNumber = fileData.at(0)->versionNumber;
+        data.mappingString = fileData.at(0)->mappingString;
+    }
+
+    // if there are additional files
     if(fileData.size() > 1) {
 
         // get the set of entries from the first file
@@ -63,7 +74,6 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
                     // use mergeType parameter to determine how to combine playcounts
                     switch (mergeType) {
                     case AddPlaycounts: // add radio button
-                        qDebug() << "Add playcounts";
                         merged[entry.key()]->count += entry.value()->count; // add playcount to merged value
                         break;
                     case UseLargest: // largest radio button
@@ -104,26 +114,11 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
                 else {
                     merged[entry.key()] = entry.value();    // add the entire new entry to the merged list
                 }
-
-                qDebug() << "<Entry ID=" << entry.key()
-                         << " Count=" << merged.value(entry.key())->count
-                         << " Added=" << merged.value(entry.key())->added
-                         << " FirstPlayed=" << merged.value(entry.key())->firstPlayed
-                         << "/>";
             }
 
-            data.entries = merged;
+            data.entries = merged;  // move merged entries to the MergeData struct
         }
     }
-    // if there is only 1 file
-    else if(fileData.size() == 1) {
-        // copy data into the MergeData struct
-        data.entries = fileData.at(0)->entries;
-    }
-
-    // take the first file's version and mapping (assumed to be the same for all files)
-    data.versionNumber = fileData.at(0)->versionNumber;
-    data.mappingString = fileData.at(0)->mappingString;
 
     // return the MergeData struct
     return data;
@@ -262,8 +257,6 @@ bool MainWindow::compareFileVersionAndMapping(QList<FileData *> fileData) {
 
         // if either the version numbers or mappings are NOT equal
         if(!(sameVersion && sameMapping)) {
-            qDebug() << "Version:" << sameVersion;
-            qDebug() << "Mapping:" << sameMapping;
 
             // create a readable error string to tell to the user what isn't the same across the files
             QString errorString = "The " +
@@ -409,7 +402,7 @@ void MainWindow::on_pushButton_Merge_clicked()
                 // merge the file data
                 MergeData mergedData = mergeFileData(files.values(), mergeTypeButtonGroup.checkedId());
 
-                qDebug() << mergedData.mappingString << mergedData.entries.size();
+                qDebug() << mergedData.entries.size();
 
                 // write data to file using FileWriter object
                 // if output location file already exists, ask user to continue

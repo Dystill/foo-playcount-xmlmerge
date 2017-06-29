@@ -92,12 +92,6 @@ QMap<QString, EntryStatistics *> FileReader::readFile()
             counts.append(stats->count);
 
             entryMap[this->attributes().value("", ID).toString()] = stats;  // add entry to qmap
-
-            qDebug() << "<Entry ID=" << this->attributes().value("", ID).toString()
-                     << " Count=" << stats->count
-                     << " Added=" << stats->added
-                     << " FirstPlayed=" << stats->firstPlayed
-                     << "/>";
         }
 
         // else save the version and mapping data found in the parent tag

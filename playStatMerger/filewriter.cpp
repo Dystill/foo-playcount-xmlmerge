@@ -19,7 +19,6 @@ FileWriter::FileWriter(QString output, MergeData data)
 }
 
 void FileWriter::writeFile(MergeData data) {
-    qDebug() << "TODO: write file";
 
     // add comment saying this file was merged
     this->writeComment("File created by merging other playback export files.");
