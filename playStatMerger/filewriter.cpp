@@ -24,9 +24,9 @@ void FileWriter::writeFile(MergeData data) {
     this->writeComment("File created by merging other playback export files.");
 
     // add PlaybackStatistics parent tag
-    this->writeStartElement("PlaybackStatistics");
-    this->writeAttribute("Version", data.versionNumber);    // set Version attribute
-    this->writeAttribute("Mapping", data.mappingString);    // set Mapping attribute
+    this->writeStartElement(PlayBackXmlName::PARENT_TAG);
+    this->writeAttribute(PlayBackXmlName::VERSION, data.versionNumber);    // set Version attribute
+    this->writeAttribute(PlayBackXmlName::MAPPING, data.mappingString);    // set Mapping attribute
 
     // go through each value in the MergeData "entries" QMap
     QMap<QString,EntryStatistics *>::iterator i;
@@ -39,21 +39,21 @@ void FileWriter::writeFile(MergeData data) {
 
 void FileWriter::writeEntry(QString id, EntryStatistics entryData) {
 
-    writeStartElement("Entry");     // start Entry
+    writeStartElement(PlayBackXmlName::ENTRY_TAG);     // start Entry
 
     // required attributes
-    this->writeAttribute("ID", id);
-    this->writeAttribute("Count", QString::number(entryData.count));
+    this->writeAttribute(PlayBackXmlName::ID, id);
+    this->writeAttribute(PlayBackXmlName::COUNT, QString::number(entryData.count));
 
     // optional attributes - don't add if value == 0
     if(entryData.rating != 0)
-        this->writeAttribute("Rating", QString::number(entryData.rating));
+        this->writeAttribute(PlayBackXmlName::RATING, QString::number(entryData.rating));
     if(entryData.firstPlayed != 0)
-        this->writeAttribute("FirstPlayed", entryData.firstPlayed);
+        this->writeAttribute(PlayBackXmlName::FIRST_PLAYED, entryData.firstPlayed);
     if(entryData.lastPlayed != 0)
-        this->writeAttribute("LastPlayed", entryData.lastPlayed);
+        this->writeAttribute(PlayBackXmlName::LAST_PLAYED, entryData.lastPlayed);
     if(entryData.added != 0)
-        this->writeAttribute("Added", entryData.added);
+        this->writeAttribute(PlayBackXmlName::ADDED, entryData.added);
 
     writeEndElement();  // end Entry
 }

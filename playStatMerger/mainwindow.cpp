@@ -404,8 +404,6 @@ void MainWindow::on_pushButton_Merge_clicked()
                 // merge the file data
                 MergeData mergedData = mergeFileData(files.values(), mergeTypeButtonGroup.checkedId());
 
-                qDebug() << mergedData.entries.size();
-
                 // write data to file using FileWriter object
                 // if output location file already exists, ask user to continue
                 if(!checkFileExistence(outputLocation) || promptUserToContinue("File already exists. Overwrite?"))
