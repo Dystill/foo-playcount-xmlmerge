@@ -38,11 +38,41 @@ void MainWindow::groupRadioButtons() {
     mergeTypeButtonGroup.addButton(ui->radioButton_Smallest, UseSmallest);
 }
 
+MergeData MainWindow::copyFileDataToMergeData(FileData *fileData) {
+
+    MergeData data;
+
+    // copy each entry's data individually
+    QMap<QString,EntryStatistics *>::iterator entry;
+    for(entry = fileData->entries.begin(); entry != fileData->entries.end(); entry++) {
+        data.entries[entry.key()] = new EntryStatistics();
+
+        data.entries.value(entry.key())->count = entry.value()->count;
+        data.entries.value(entry.key())->added = entry.value()->added;
+        data.entries.value(entry.key())->firstPlayed = entry.value()->firstPlayed;
+        data.entries.value(entry.key())->lastPlayed = entry.value()->lastPlayed;
+        data.entries.value(entry.key())->rating = entry.value()->rating;
+    }
+
+    // copy version and mapping to mergedata
+    data.versionNumber = fileData->versionNumber;
+    data.mappingString = fileData->mappingString;
+
+    return data;
+
+}
+
 MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
 {
     MergeData data;
 
-    // if there's at least 1 file
+    // if there is atleast 1 file
+    if(fileData.size() >= 1) {
+        // copy first file's data into mergedata struct
+        data = copyFileDataToMergeData(fileData.at(0));
+    }
+
+    // if there are additional files
     if(fileData.size() > 1) {
 
         // get the set of entries from the first file
@@ -63,17 +93,18 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
                     // use mergeType parameter to determine how to combine playcounts
                     switch (mergeType) {
                     case AddPlaycounts: // add radio button
-                        qDebug() << "Add playcounts";
                         merged[entry.key()]->count += entry.value()->count; // add playcount to merged value
                         break;
                     case UseLargest: // largest radio button
                         merged[entry.key()]->count =
                                 std::max(merged.value(entry.key())->count,
                                          entry.value()->count);            // take the largest count value
+                        break;
                     case UseSmallest: // smallest radio button
                         merged[entry.key()]->count =
                                 std::min(merged.value(entry.key())->count,
                                          entry.value()->count);            // take the smallest count value
+                        break;
                     default:
                         QMessageBox::information(this,"","No radio button was selected. Defaulting to add playcounts.");
                         merged[entry.key()]->count += entry.value()->count; // add playcount to merged value
@@ -105,14 +136,9 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
                     merged[entry.key()] = entry.value();    // add the entire new entry to the merged list
                 }
             }
+
+            data.entries = merged;  // move merged entries to the MergeData struct
         }
-    }
-    // if there is only 1 file
-    else if(fileData.size() == 1) {
-        // copy data into the MergeData struct
-        data.entries = fileData.at(0)->entries;
-        data.versionNumber = fileData.at(0)->versionNumber;
-        data.mappingString = fileData.at(0)->mappingString;
     }
 
     // return the MergeData struct
@@ -252,8 +278,6 @@ bool MainWindow::compareFileVersionAndMapping(QList<FileData *> fileData) {
 
         // if either the version numbers or mappings are NOT equal
         if(!(sameVersion && sameMapping)) {
-            qDebug() << "Version:" << sameVersion;
-            qDebug() << "Mapping:" << sameMapping;
 
             // create a readable error string to tell to the user what isn't the same across the files
             QString errorString = "The " +
@@ -263,19 +287,7 @@ bool MainWindow::compareFileVersionAndMapping(QList<FileData *> fileData) {
                     " values for some of the selected files are not equal.\nContinue?";
 
             // display dialog asking the user how to continue
-            QMessageBox::StandardButton clicked =
-                    QMessageBox::question(this, "", errorString,
-                                          QMessageBox::Ok | QMessageBox::Cancel,
-                                          QMessageBox::Cancel);
-
-            // return true or false depending on what button was pressed
-            switch(clicked) {
-            case QMessageBox::Ok:       // true if ok
-                return true;
-            case QMessageBox::Cancel:   // false if cancel or other
-            default:
-                return false;
-            };
+            return promptUserToContinue(errorString);
 
         }
         else {  // return true if the version numbers and mappings are all the same
@@ -285,6 +297,35 @@ bool MainWindow::compareFileVersionAndMapping(QList<FileData *> fileData) {
     else {  // return true if there is only one file
         return true;
     }
+}
+
+bool MainWindow::checkFileExistence(QString outputLocation)
+{
+    // TODO: function to check if file at location exists
+    QFile file(outputLocation);
+
+    if(file.exists()) {
+        return true;
+    }
+
+    return false;
+}
+
+bool MainWindow::promptUserToContinue(QString errorString, QMessageBox::StandardButton defaultButton) {
+    // display dialog asking the user how to continue
+    QMessageBox::StandardButton clicked =
+            QMessageBox::question(this, "", errorString,
+                                  QMessageBox::Ok | QMessageBox::Cancel,
+                                  defaultButton);
+
+    // return true or false depending on what button was pressed
+    switch(clicked) {
+    case QMessageBox::Ok:       // true if ok
+        return true;
+    case QMessageBox::Cancel:   // false if cancel or other
+    default:
+        return false;
+    };
 }
 
 void MainWindow::on_pushButton_Add_clicked()
@@ -373,13 +414,22 @@ void MainWindow::on_pushButton_Merge_clicked()
             // compared the version number and mapping code
             if(compareFileVersionAndMapping(files.values())) {
                 // append directory with a slash if there isn't one
-                if(!outputFileDir.endsWith('/')) outputFileDir.append('/');
+                if(!outputFileDir.endsWith('/'))
+                    outputFileDir.append('/');
 
                 // create a qfile object for the specified output dir and file name
-                QFile outputFile(outputFileDir + outputFileName);
+                QString outputLocation = outputFileDir + outputFileName;
 
                 // merge the file data
-                MergeData merged = mergeFileData(files.values(), mergeTypeButtonGroup.checkedId());
+                MergeData mergedData = mergeFileData(files.values(), mergeTypeButtonGroup.checkedId());
+
+                // write data to file using FileWriter object
+                // if output location file already exists, ask user to continue
+                if(!checkFileExistence(outputLocation) || promptUserToContinue("File already exists. Overwrite?"))
+                    FileWriter writer(outputLocation, mergedData);
+
+                // delete merged data entries
+                qDeleteAll(mergedData.entries);
             }
             else {
                 QMessageBox::information(this, "", "Merge cancelled.");

@@ -75,29 +75,30 @@ QMap<QString, EntryStatistics *> FileReader::readFile()
     // loop to eof
     while(!this->atEnd()) {
 
+
         // if the item is an entry child tag
-        if(this->isStartElement() && this->name().toString() == ENTRY_TAG) {
+        if(this->isStartElement() && this->name().toString() == PlayBackXmlName::ENTRY_TAG) {
 
             entryCount++;
 
             // add information to stat struct
             EntryStatistics *stats = new EntryStatistics;
-            stats->count = this->attributes().value("", COUNT).toInt();
-            stats->rating = this->attributes().value("", RATING).toInt();
-            stats->firstPlayed = this->attributes().value("", FIRST_PLAYED).toInt();
-            stats->lastPlayed = this->attributes().value("", LAST_PLAYED).toInt();
-            stats->added = this->attributes().value("", ADDED).toInt();
+            stats->count = this->attributes().value("", PlayBackXmlName::COUNT).toInt();
+            stats->rating = this->attributes().value("", PlayBackXmlName::RATING).toInt();
+            stats->firstPlayed = this->attributes().value("", PlayBackXmlName::FIRST_PLAYED).toString();
+            stats->lastPlayed = this->attributes().value("", PlayBackXmlName::LAST_PLAYED).toString();
+            stats->added = this->attributes().value("", PlayBackXmlName::ADDED).toString();
 
-            totalPlays += stats->count;
+            totalPlays += stats->count; // keep track of total plays
             counts.append(stats->count);
 
-            entryMap[this->attributes().value("", ID).toString()] = stats;  // add entry to qmap
+            entryMap[this->attributes().value("", PlayBackXmlName::ID).toString()] = stats;  // add entry to qmap
         }
 
         // else save the version and mapping data found in the parent tag
-        else if(this->isStartElement() && this->name().toString() == PARENT_TAG) {
-            versionNumber = this->attributes().value("", VERSION).toString();
-            mappingString = this->attributes().value("", MAPPING).toString();
+        else if(this->isStartElement() && this->name().toString() == PlayBackXmlName::PARENT_TAG) {
+            versionNumber = this->attributes().value("", PlayBackXmlName::VERSION).toString();
+            mappingString = this->attributes().value("", PlayBackXmlName::MAPPING).toString();
         }
 
         this->readNext();

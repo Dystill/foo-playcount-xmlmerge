@@ -13,19 +13,6 @@ private:
 
     QList<qreal> counts;  // holds each count value for faster access - no association with entry ids
 
-    // XML tag strings
-    const QString PARENT_TAG = "PlaybackStatistics";
-    const QString VERSION = "Version";
-    const QString MAPPING = "Mapping";
-
-    const QString ENTRY_TAG = "Entry";
-    const QString ID = "ID";
-    const QString COUNT = "Count";
-    const QString RATING = "Rating";
-    const QString ADDED = "Added";
-    const QString FIRST_PLAYED = "FirstPlayed";
-    const QString LAST_PLAYED = "LastPlayed";
-
     // meta data
     QString fileName;
     QString filePath;
