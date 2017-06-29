@@ -70,6 +70,7 @@ private:
     bool checkFileExistence(QString outputLocation);
 
     bool promptUserToContinue(QString errorString, QMessageBox::StandardButton defaultButton = QMessageBox::Cancel);
+    MergeData copyFileDataToMergeData(FileData *fileData);
 };
 
 #endif // MAINWINDOW_H

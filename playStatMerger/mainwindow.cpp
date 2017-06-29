@@ -38,19 +38,38 @@ void MainWindow::groupRadioButtons() {
     mergeTypeButtonGroup.addButton(ui->radioButton_Smallest, UseSmallest);
 }
 
+MergeData MainWindow::copyFileDataToMergeData(FileData *fileData) {
+
+    MergeData data;
+
+    // copy each entry's data individually
+    QMap<QString,EntryStatistics *>::iterator entry;
+    for(entry = fileData->entries.begin(); entry != fileData->entries.end(); entry++) {
+        data.entries[entry.key()] = new EntryStatistics();
+
+        data.entries.value(entry.key())->count = entry.value()->count;
+        data.entries.value(entry.key())->added = entry.value()->added;
+        data.entries.value(entry.key())->firstPlayed = entry.value()->firstPlayed;
+        data.entries.value(entry.key())->lastPlayed = entry.value()->lastPlayed;
+        data.entries.value(entry.key())->rating = entry.value()->rating;
+    }
+
+    // copy version and mapping to mergedata
+    data.versionNumber = fileData->versionNumber;
+    data.mappingString = fileData->mappingString;
+
+    return data;
+
+}
+
 MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
 {
     MergeData data;
 
     // if there is atleast 1 file
     if(fileData.size() >= 1) {
-
-        // copy entries from first file in FileData list
-        data.entries = fileData.at(0)->entries;
-
-        // take the first file's version and mapping (assumed to be the same for all files)
-        data.versionNumber = fileData.at(0)->versionNumber;
-        data.mappingString = fileData.at(0)->mappingString;
+        // copy first file's data into mergedata struct
+        data = copyFileDataToMergeData(fileData.at(0));
     }
 
     // if there are additional files
@@ -91,6 +110,7 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
                         merged[entry.key()]->count += entry.value()->count; // add playcount to merged value
                         break;
                     }
+                    qDebug() << mergeType << merged[entry.key()]->count;
 
                     // rating
                     merged[entry.key()]->rating =
@@ -408,6 +428,8 @@ void MainWindow::on_pushButton_Merge_clicked()
                 // if output location file already exists, ask user to continue
                 if(!checkFileExistence(outputLocation) || promptUserToContinue("File already exists. Overwrite?"))
                     FileWriter writer(outputLocation, mergedData);
+
+                qDeleteAll(mergedData.entries);
             }
             else {
                 QMessageBox::information(this, "", "Merge cancelled.");
