@@ -110,7 +110,6 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
                         merged[entry.key()]->count += entry.value()->count; // add playcount to merged value
                         break;
                     }
-                    qDebug() << mergeType << merged[entry.key()]->count;
 
                     // rating
                     merged[entry.key()]->rating =
@@ -429,6 +428,7 @@ void MainWindow::on_pushButton_Merge_clicked()
                 if(!checkFileExistence(outputLocation) || promptUserToContinue("File already exists. Overwrite?"))
                     FileWriter writer(outputLocation, mergedData);
 
+                // delete merged data entries
                 qDeleteAll(mergedData.entries);
             }
             else {

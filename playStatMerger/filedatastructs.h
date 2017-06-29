@@ -8,7 +8,9 @@
 
 #include <QDebug>
 
-// data structure to hold playback statistics for each song entry in the export xml file
+/**
+ * @brief The EntryStatistics struct to hold data for an individual entry
+ */
 struct EntryStatistics {
     int count = 0;
     int rating = 0;
@@ -17,13 +19,17 @@ struct EntryStatistics {
     QString added = 0;
 };
 
-// data structure to hold the information for a single export file
+/**
+ * @brief The FileData struct holds extra information for a single export file.
+ *
+ * Includes a map for all EntryStatistics.
+ */
 struct FileData {
 
     QString fileName;
     QString filePath;
 
-    QMap<QString,EntryStatistics *> entries;
+    QMap<QString,EntryStatistics *> entries;    // entry id : EntryStatistics
 
     QString versionNumber;
     QString mappingString;
@@ -37,15 +43,21 @@ struct FileData {
 
 };
 
-// data structure to hold file information after merging
+/**
+ * @brief The MergeData struct holds data merging a set of FileData
+ *
+ * Can be seen as an abbreviated version of FileData
+ */
 struct MergeData {
-    QMap<QString,EntryStatistics *> entries;
+    QMap<QString,EntryStatistics *> entries;    // entry id : EntryStatistics
 
     QString versionNumber;
     QString mappingString;
 };
 
-// XML tag strings
+/**
+ * @brief The PlaybackXmlName namespace holds XML tag strings for easy access
+ */
 namespace PlayBackXmlName
 {
     const QString PARENT_TAG = "PlaybackStatistics";
