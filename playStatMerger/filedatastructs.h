@@ -11,10 +11,10 @@
 // data structure to hold playback statistics for each song entry in the export xml file
 struct EntryStatistics {
     int count = 0;
-    int rating;
-    int firstPlayed;
-    int lastPlayed;
-    int added;
+    int rating = 0;
+    QString firstPlayed = 0;
+    QString lastPlayed = 0;
+    QString added = 0;
 };
 
 // data structure to hold the information for a single export file

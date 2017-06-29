@@ -104,6 +104,12 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
                 else {
                     merged[entry.key()] = entry.value();    // add the entire new entry to the merged list
                 }
+
+                qDebug() << "<Entry ID=" << entry.key()
+                         << " Count=" << merged.value(entry.key())->count
+                         << " Added=" << merged.value(entry.key())->added
+                         << " FirstPlayed=" << merged.value(entry.key())->firstPlayed
+                         << "/>";
             }
 
             data.entries = merged;

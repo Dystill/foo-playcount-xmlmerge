@@ -84,14 +84,20 @@ QMap<QString, EntryStatistics *> FileReader::readFile()
             EntryStatistics *stats = new EntryStatistics;
             stats->count = this->attributes().value("", COUNT).toInt();
             stats->rating = this->attributes().value("", RATING).toInt();
-            stats->firstPlayed = this->attributes().value("", FIRST_PLAYED).toInt();
-            stats->lastPlayed = this->attributes().value("", LAST_PLAYED).toInt();
-            stats->added = this->attributes().value("", ADDED).toInt();
+            stats->firstPlayed = this->attributes().value("", FIRST_PLAYED).toString();
+            stats->lastPlayed = this->attributes().value("", LAST_PLAYED).toString();
+            stats->added = this->attributes().value("", ADDED).toString();
 
-            totalPlays += stats->count;
+            totalPlays += stats->count; // keep track of total plays
             counts.append(stats->count);
 
             entryMap[this->attributes().value("", ID).toString()] = stats;  // add entry to qmap
+
+            qDebug() << "<Entry ID=" << this->attributes().value("", ID).toString()
+                     << " Count=" << stats->count
+                     << " Added=" << stats->added
+                     << " FirstPlayed=" << stats->firstPlayed
+                     << "/>";
         }
 
         // else save the version and mapping data found in the parent tag
