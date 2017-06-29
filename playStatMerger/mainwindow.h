@@ -67,6 +67,9 @@ private:
     bool compareFileVersionAndMapping(QList<FileData *> fileData);
     // QMap<QString, EntryStatistics *> addPlayCountEntries(QList<FileData *> fileData);
 
+    bool checkFileExistence(QString outputLocation);
+
+    bool promptUserToContinue(QString errorString, QMessageBox::StandardButton defaultButton = QMessageBox::Cancel);
 };
 
 #endif // MAINWINDOW_H

@@ -9,7 +9,7 @@ class FileWriter : public QXmlStreamWriter
 {
 private:
     void writeFile(MergeData data);
-
+    void writeEntry(QString id, EntryStatistics entryData);
 public:
     FileWriter();
     FileWriter(QString output, MergeData data);

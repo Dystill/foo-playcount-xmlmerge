@@ -105,15 +105,19 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
                     merged[entry.key()] = entry.value();    // add the entire new entry to the merged list
                 }
             }
+
+            data.entries = merged;
         }
     }
     // if there is only 1 file
     else if(fileData.size() == 1) {
         // copy data into the MergeData struct
         data.entries = fileData.at(0)->entries;
-        data.versionNumber = fileData.at(0)->versionNumber;
-        data.mappingString = fileData.at(0)->mappingString;
     }
+
+    // take the first file's version and mapping (assumed to be the same for all files)
+    data.versionNumber = fileData.at(0)->versionNumber;
+    data.mappingString = fileData.at(0)->mappingString;
 
     // return the MergeData struct
     return data;
@@ -263,19 +267,7 @@ bool MainWindow::compareFileVersionAndMapping(QList<FileData *> fileData) {
                     " values for some of the selected files are not equal.\nContinue?";
 
             // display dialog asking the user how to continue
-            QMessageBox::StandardButton clicked =
-                    QMessageBox::question(this, "", errorString,
-                                          QMessageBox::Ok | QMessageBox::Cancel,
-                                          QMessageBox::Cancel);
-
-            // return true or false depending on what button was pressed
-            switch(clicked) {
-            case QMessageBox::Ok:       // true if ok
-                return true;
-            case QMessageBox::Cancel:   // false if cancel or other
-            default:
-                return false;
-            };
+            return promptUserToContinue(errorString);
 
         }
         else {  // return true if the version numbers and mappings are all the same
@@ -285,6 +277,35 @@ bool MainWindow::compareFileVersionAndMapping(QList<FileData *> fileData) {
     else {  // return true if there is only one file
         return true;
     }
+}
+
+bool MainWindow::checkFileExistence(QString outputLocation)
+{
+    // TODO: function to check if file at location exists
+    QFile file(outputLocation);
+
+    if(file.exists()) {
+        return true;
+    }
+
+    return false;
+}
+
+bool MainWindow::promptUserToContinue(QString errorString, QMessageBox::StandardButton defaultButton) {
+    // display dialog asking the user how to continue
+    QMessageBox::StandardButton clicked =
+            QMessageBox::question(this, "", errorString,
+                                  QMessageBox::Ok | QMessageBox::Cancel,
+                                  defaultButton);
+
+    // return true or false depending on what button was pressed
+    switch(clicked) {
+    case QMessageBox::Ok:       // true if ok
+        return true;
+    case QMessageBox::Cancel:   // false if cancel or other
+    default:
+        return false;
+    };
 }
 
 void MainWindow::on_pushButton_Add_clicked()
@@ -382,8 +403,12 @@ void MainWindow::on_pushButton_Merge_clicked()
                 // merge the file data
                 MergeData mergedData = mergeFileData(files.values(), mergeTypeButtonGroup.checkedId());
 
+                qDebug() << mergedData.mappingString << mergedData.entries.size();
+
                 // write data to file using FileWriter object
-                FileWriter writer(outputLocation, mergedData);
+                // if output location file already exists, ask user to continue
+                if(!checkFileExistence(outputLocation) || promptUserToContinue("File already exists. Overwrite?"))
+                    FileWriter writer(outputLocation, mergedData);
             }
             else {
                 QMessageBox::information(this, "", "Merge cancelled.");
