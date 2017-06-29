@@ -403,14 +403,14 @@
             <item>
              <widget class="QRadioButton" name="radioButton_Largest">
               <property name="text">
-               <string>Use Largest Playcount (X)</string>
+               <string>Use Largest Playcount</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QRadioButton" name="radioButton_Smallest">
               <property name="text">
-               <string>Use Smallest Playcount (X)</string>
+               <string>Use Smallest Playcount</string>
               </property>
              </widget>
             </item>

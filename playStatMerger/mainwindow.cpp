@@ -80,10 +80,12 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
                         merged[entry.key()]->count =
                                 std::max(merged.value(entry.key())->count,
                                          entry.value()->count);            // take the largest count value
+                        break;
                     case UseSmallest: // smallest radio button
                         merged[entry.key()]->count =
                                 std::min(merged.value(entry.key())->count,
                                          entry.value()->count);            // take the smallest count value
+                        break;
                     default:
                         QMessageBox::information(this,"","No radio button was selected. Defaulting to add playcounts.");
                         merged[entry.key()]->count += entry.value()->count; // add playcount to merged value
