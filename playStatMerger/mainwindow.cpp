@@ -329,7 +329,8 @@ void MainWindow::on_pushButton_Remove_clicked()
 void MainWindow::on_pushButton_Refresh_clicked()
 {
     // reparse the currently selected item's file
-    if(this->parseFile(ui->listWidget->currentItem()->text())){
+    if(ui->listWidget->selectedItems().count() == 1 &&
+            this->parseFile(ui->listWidget->currentItem()->text())) {
 
         // display the files information in the ui
         displayItemInfo(ui->listWidget->currentItem());
