@@ -145,52 +145,6 @@ MergeData MainWindow::mergeFileData(QList<FileData *> fileData, int mergeType)
     return data;
 }
 
-/*
-QMap<QString,EntryStatistics *> MainWindow::addPlayCountEntries(QList<FileData *> fileData) {
-
-    QMap<QString,EntryStatistics *> merged;   // holds the combined values for all lists
-
-    // if there's at least 1 file
-    if(fileData.size() >= 1) {
-        merged = fileData.at(0)->entries;    // get the set of entries from the first file
-
-        // go through each file
-        for(int i = 1; i < fileData.size(); i++) {
-
-            QMap<QString,EntryStatistics *> current = fileData.at(i)->entries;  // get the next file's entries map
-
-            // iterate through each value in the map
-            QMap<QString,EntryStatistics *>::iterator entry;
-            for(entry = current.begin(); entry != current.end(); entry++) {
-
-                // if the merged list already contains the entry id
-                if(merged.contains(entry.key())) {
-                    merged[entry.key()]->count += entry.value()->count; // add playcount to merged value
-                    merged[entry.key()]->rating =
-                            std::max(merged.value(entry.key())->rating,
-                                     entry.value()->rating);            // take the largest rating value
-                    merged[entry.key()]->added =
-                            std::min(merged.value(entry.key())->added,
-                                     entry.value()->added);             // take the smallest added value
-                    merged[entry.key()]->firstPlayed =
-                            std::min(merged.value(entry.key())->firstPlayed,
-                                     entry.value()->firstPlayed);       // take the smallest firstPlayed value
-                    merged[entry.key()]->lastPlayed =
-                            std::min(merged.value(entry.key())->lastPlayed,
-                                     entry.value()->lastPlayed);        // take the smallest lastPlayed value
-                }
-                // else this is a new entry
-                else {
-                    merged[entry.key()] = entry.value();    // add the entire new entry to the merged list
-                }
-            }
-        }
-    }
-
-    return merged;
-}
-*/
-
 void MainWindow::displayItemInfo(QListWidgetItem *item) {
 
     QString filePath = item->text();
@@ -234,12 +188,6 @@ FileData *MainWindow::exportFileData(FileReader *reader)
     return data;
 }
 
-/**
- * @brief MainWindow::calculateStdev
- * @param values
- * @param average
- * @return return a calculated standard deviation for the listed values and the provided average
- */
 qreal MainWindow::calculateStdev(QList<qreal> values, qreal average) {
 
     qreal varSum = 0;
@@ -253,11 +201,6 @@ qreal MainWindow::calculateStdev(QList<qreal> values, qreal average) {
     return qSqrt(varSum / values.count());
 }
 
-/**
- * @brief MainWindow::compareFileVersionAndMapping
- * @param QList<FileData *> fileData
- * @return bool value for whether or not the files in the list should be merged
- */
 bool MainWindow::compareFileVersionAndMapping(QList<FileData *> fileData) {
 
     // check if there is more than 1 file
@@ -330,13 +273,13 @@ bool MainWindow::promptUserToContinue(QString errorString, QMessageBox::Standard
 
 void MainWindow::on_pushButton_Add_clicked()
 {
-    // open file choose dialog
+    // open a file-choose dialog
     QString filePath = QFileDialog::getOpenFileName(this,
                                                     tr("Open Playback Statistics Export File"),
                                                     prevFileDir,
                                                     tr("Playback File (*.xml)"));
 
-    // if the user did not cancel the action
+    // if the user did not press cancel in the above dialog
     if(!filePath.isNull()) {
 
         // save the file's path to use next time
@@ -346,26 +289,16 @@ void MainWindow::on_pushButton_Add_clicked()
         // if the file was not already added
         if(!files.contains(filePath)) {
 
-            // parse the file
-            FileReader fileReader(filePath);
-
-            // check if any errors were raised
-            if(!fileReader.hasError()) {        // no error
-
-                // add file to qmap with filepath as the key
-                files[filePath] = exportFileData(&fileReader);
+            if(this->parseFile(filePath)) {
 
                 // add file to the ui list widget and highlight it
-                ui->listWidget->setCurrentItem(new QListWidgetItem(fileReader.getFilePath(), ui->listWidget));
+                ui->listWidget->setCurrentItem(new QListWidgetItem(filePath, ui->listWidget));
 
                 // display the files information in the ui
                 displayItemInfo(ui->listWidget->currentItem());
 
             }
-            else {                              // some error
-                if(fileReader.error() != QXmlStreamReader::CustomError)
-                    QMessageBox::warning(this,"Error parsing file",fileReader.errorString());
-            }
+
         }
         else {
             QMessageBox::information(this,"","File already added.");
@@ -395,7 +328,34 @@ void MainWindow::on_pushButton_Remove_clicked()
 
 void MainWindow::on_pushButton_Refresh_clicked()
 {
-    // TODO: reread xml file and redisplay information
+    // reparse the currently selected item's file
+    if(this->parseFile(ui->listWidget->currentItem()->text())){
+
+        // display the files information in the ui
+        displayItemInfo(ui->listWidget->currentItem());
+
+    }
+}
+
+bool MainWindow::parseFile(QString filePath) {
+
+    FileReader fileReader(filePath);    // parse the file
+
+    if(!fileReader.hasError()) {    // no errors
+
+        // add file to qmap with filepath as the key
+        files[filePath] = exportFileData(&fileReader);
+
+    }
+    else {
+        // if the error is a standard xml error then display error message
+        if(fileReader.error() != QXmlStreamReader::CustomError)
+            QMessageBox::warning(this,"Error parsing file",fileReader.errorString());
+
+        return false;
+    }
+
+    return true;
 }
 
 void MainWindow::on_pushButton_Merge_clicked()

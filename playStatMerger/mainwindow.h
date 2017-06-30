@@ -54,6 +54,9 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+
+    // Variables
+
     /**
      * @brief mergeTypeButtonGroup invisible container for merge type radio buttons
      */
@@ -91,8 +94,11 @@ private:
      */
     QString prevFileDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
 
+
+    // Functions
+
     /**
-     * @brief exportFileData extracts volatile data obtained from a playback export file reader.
+     * @brief exportFileData extracts and packages data obtained from the playback export file reader.
      *
      * Function is required to prevent the obtained data from being deleted or removed from the scope.
      *
@@ -137,7 +143,7 @@ private:
     bool checkFileExistence(QString outputLocation);
 
     /**
-     * @brief promptUserToContinue displays a dialog asking the user if they want to continue
+     * @brief promptUserToContinue displays a dialog asking the user if they want to continue an action
      * @param errorString   The string to display to the user in the dialog
      * @param defaultButton The button to highlight initally / default = Cancel
      * @return bool true if they chose to proceed / false if not
@@ -153,6 +159,13 @@ private:
      * @return MergeData    after copying the necessary data
      */
     MergeData copyFileDataToMergeData(FileData *fileData);
+
+    /**
+     * @brief parseFile creates a FileReader to parse a file in the passed in path
+     * @param filePath  File path pointing to the playback export file to be parsed
+     * @return bool     true if parsing was successful
+     */
+    bool parseFile(QString filePath);
 };
 
 #endif // MAINWINDOW_H
